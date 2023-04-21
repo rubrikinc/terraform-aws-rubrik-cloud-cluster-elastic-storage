@@ -180,6 +180,15 @@ resource "aws_s3_bucket" "cces-s3-bucket" {
   tags          = var.aws_tags
 }
 
+resource "aws_s3_bucket_public_access_block" "cces-s3-bucket-public-access" {
+  bucket = aws_s3_bucket.cces-s3-bucket.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "cces-s3-bucket-encryption" {
   bucket = var.s3_bucket_name == "" ? "${var.cluster_name}.bucket-do-not-delete" : var.s3_bucket_name
 
