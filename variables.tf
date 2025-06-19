@@ -135,13 +135,25 @@ variable "aws_cloud_cluster_ec2_instance_profile_name" {
   default     = ""
 }
 
+variable "aws_cloud_cluster_iam_managed_policies" {
+  description = "Set of IAM managed policy ARNs to attach to the Cloud Cluster ES IAM role."
+  type        = set(string)
+  default     = null
+}
+
+variable "aws_cloud_cluster_iam_permission_boundary" {
+  description = "ARN of the policy that is used to set the permissions boundary for the Cloud Cluster ES IAM role."
+  type        = string
+  default     = null
+}
+
 variable "s3_bucket_name" {
   description = "Name of the S3 bucket to use with Cloud Cluster ES data storage. If blank a name will be auto generated."
   type        = string
   default     = ""
 }
 
-variable "enableImmutability" {
+variable "enable_immutability" {
   description = "Enables object lock and versioning on the S3 bucket. Sets the object lock flag during bootstrap. Not supported on CDM v8.0.1 and earlier."
   type        = bool
   default     = true
@@ -181,7 +193,7 @@ variable "admin_password" {
   description = "Password for the Rubrik Cloud Cluster admin account."
   type        = string
   sensitive   = true
-  default     = "ChangeMe"
+  default     = "RubrikGoForward"
 }
 
 variable "dns_search_domain" {
@@ -264,4 +276,17 @@ variable "register_cluster_with_rsc" {
   description = "Register the Rubrik Cloud Cluster with Rubrik Security Cloud."
   type        = bool
   default     = false
+}
+
+variable "enableImmutability" {
+  description = "Deprecated: use enable_immutability instead."
+  type        = bool
+  default     = null
+}
+
+check "deprecations" {
+  assert {
+    condition     = var.enableImmutability == null
+    error_message = "The enableImmutability variable has been deprecated, use enable_immutability instead."
+  }
 }
