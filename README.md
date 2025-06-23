@@ -35,6 +35,25 @@ module "rubrik_aws_cloud_cluster" {
 * Remove redundant empty provider statement
 * Reduce non-data disk throughput when using split disks to 125.
 
+## Upgrading
+
+### v1.4.1 to v1.5.0
+1. Change the version of the module from `1.4.1` to `1.5.0`.
+2. Run `terraform init -upgrade`. The `-upgrade` command line option is required since the updated module requires a new
+   version of the RSC (polaris) Terraform provider.
+3. Run `terraform plan` and check the output carefully, only the `polaris_cdm_bootstrap_cces_aws` resource should have
+   a diff and be updated in-place:
+   ```text
+   # module.rubrik_cluster.polaris_cdm_bootstrap_cces_aws.bootstrap_cces_aws will be updated in-place
+   ~ resource "polaris_cdm_bootstrap_cces_aws" "bootstrap_cces_aws" {
+       + cluster_node_ip_address = "<ip-address-of-first-node>"
+         id                      = "<cluster-name>"
+         # (15 unchanged attributes hidden)
+     }
+   ```
+   There should be no resources replaced or removed.
+4. Run `terraform apply`.
+
 ## Troubleshooting
 
 ### Error: OptInRequired
@@ -134,7 +153,7 @@ welcome. Thank you in advance for all of your issues, pull requests, and comment
 | <a name="input_dns_name_servers"></a> [dns\_name\_servers](#input\_dns\_name\_servers) | List of the IPv4 addresses of the DNS servers. | `list(any)` | <pre>[<br/>  "169.254.169.253"<br/>]</pre> | no |
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | List of search domains that the DNS Service will use to resolve hostnames that are not fully qualified. | `list(any)` | `[]` | no |
 | <a name="input_enableImmutability"></a> [enableImmutability](#input\_enableImmutability) | Deprecated: use enable\_immutability instead. | `bool` | `null` | no |
-| <a name="input_enable_immutability"></a> [enable\_immutability](#input\_enable\_immutability) | Enables object lock and versioning on the S3 bucket. Sets the object lock flag during bootstrap. Not supported on CDM v8.0.1 and earlier. | `bool` | `true` | no |
+| <a name="input_enable_immutability"></a> [enable\_immutability](#input\_enable\_immutability) | Enables object lock and versioning on the S3 bucket. Sets the object lock flag during bootstrap. Not supported on CDM v8.0.1 and earlier. | `bool` | `null` | no |
 | <a name="input_node_boot_wait"></a> [node\_boot\_wait](#input\_node\_boot\_wait) | Number of seconds to wait for CCES nodes to boot before attempting to bootstrap them. | `number` | `300` | no |
 | <a name="input_ntp_server1_key"></a> [ntp\_server1\_key](#input\_ntp\_server1\_key) | Symmetric key material for NTP server #1. | `string` | `""` | no |
 | <a name="input_ntp_server1_key_id"></a> [ntp\_server1\_key\_id](#input\_ntp\_server1\_key\_id) | The ID number of the symmetric key used with NTP server #1. (Typically this is 0) | `number` | `0` | no |
