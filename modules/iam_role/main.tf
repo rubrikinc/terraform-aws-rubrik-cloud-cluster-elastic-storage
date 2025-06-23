@@ -99,13 +99,13 @@ resource "aws_iam_role_policy" "rubrik_ec2_s3_policy" {
   role   = aws_iam_role.rubrik_ec2_s3.name
 }
 
-data "aws_iam_policy" "role_managed_policies" {
-  for_each = var.role_managed_policies
+data "aws_iam_policy" "rubrik_ec2_s3_managed_policies" {
+  for_each = var.role_managed_policies != null ? var.role_managed_policies : []
   arn      = each.value
 }
 
-resource "aws_iam_role_policy_attachment" "role_extra_policies" {
-  for_each   = data.aws_iam_policy.role_managed_policies
+resource "aws_iam_role_policy_attachment" "rubrik_ec2_s3_managed_policies" {
+  for_each   = data.aws_iam_policy.rubrik_ec2_s3_managed_policies
   policy_arn = each.value.arn
   role       = aws_iam_role.rubrik_ec2_s3.name
 }

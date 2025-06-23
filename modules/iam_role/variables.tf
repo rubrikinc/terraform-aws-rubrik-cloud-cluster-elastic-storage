@@ -42,6 +42,7 @@ variable "tags" {
 }
 
 # Deprecated variables.
+
 variable "enableImmutability" {
   type        = bool
   default     = null

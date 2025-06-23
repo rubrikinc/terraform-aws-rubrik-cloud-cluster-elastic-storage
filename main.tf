@@ -5,8 +5,6 @@ locals {
   cluster_node_names = formatlist("${var.cluster_name}-%02s", range(1, var.number_of_nodes + 1))
   ami_id             = var.aws_image_id == "" || var.aws_image_id == "latest" ? data.aws_ami_ids.rubrik_cloud_cluster.ids[0] : var.aws_image_id
   sg_ids             = var.aws_cloud_cluster_nodes_sg_ids == "" ? [module.rubrik_nodes_sg.security_group_id] : concat(var.aws_cloud_cluster_nodes_sg_ids, [module.rubrik_nodes_sg.security_group_id])
-  instance_type      = var.aws_instance_type
-  enableImmutability = var.enableImmutability ? 1 : 0
   ebs_throughput     = (var.cluster_disk_type == "gp3" ? 250 : null)
   aws_key_pair_name  = var.aws_key_pair_name == "" ? module.aws_key_pair.key_pair_name : var.aws_key_pair_name
   cluster_node_config = {
@@ -160,7 +158,7 @@ module "iam_role" {
   source = "./modules/iam_role"
 
   bucket_arn               = aws_s3_bucket.cces-s3-bucket.arn
-  enable_immutability      = var.enableImmutability
+  enable_immutability      = local.enable_immutability
   instance_profile_name    = var.aws_cloud_cluster_ec2_instance_profile_name == "" ? "${var.cluster_name}.instance-profile" : var.aws_cloud_cluster_ec2_instance_profile_name
   role_managed_policies    = var.aws_cloud_cluster_iam_managed_policies
   role_name                = var.aws_cloud_cluster_iam_role_name == "" ? "${var.cluster_name}.role" : var.aws_cloud_cluster_iam_role_name
@@ -192,12 +190,12 @@ module "s3_vpc_endpoint" {
 resource "aws_s3_bucket" "cces-s3-bucket" {
   bucket              = var.s3_bucket_name == "" ? "${var.cluster_name}.bucket-do-not-delete" : var.s3_bucket_name
   force_destroy       = var.s3_bucket_force_destroy
-  object_lock_enabled = var.enableImmutability
+  object_lock_enabled = local.enable_immutability
   tags                = var.aws_tags
 }
 
 resource "aws_s3_bucket_versioning" "cces-s3-bucket-versioning" {
-  count  = local.enableImmutability
+  count  = local.enable_immutability ? 1 : 0
   bucket = aws_s3_bucket.cces-s3-bucket.id
   versioning_configuration {
     status = "Enabled"
@@ -260,7 +258,7 @@ resource "polaris_cdm_bootstrap_cces_aws" "bootstrap_cces_aws" {
   ntp_server1_name        = var.ntp_server1_name
   ntp_server2_name        = var.ntp_server2_name
   bucket_name             = var.s3_bucket_name == "" ? "${var.cluster_name}.bucket-do-not-delete" : var.s3_bucket_name
-  enable_immutability     = var.enableImmutability
+  enable_immutability     = local.enable_immutability
   timeout                 = var.timeout
   depends_on              = [time_sleep.wait_for_nodes_to_boot]
 }
