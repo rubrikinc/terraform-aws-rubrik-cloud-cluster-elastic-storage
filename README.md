@@ -30,7 +30,7 @@ module "rubrik_aws_cloud_cluster" {
   `aws_cloud_cluster_iam_permission_boundary` module input variable.
 * Deprecate the `enableImmutability` module input variable. Use the `enable_immutability` variable instead.
 * Update the [polaris](https://registry.terraform.io/providers/rubrikinc/polaris/latest) Terraform provider to version
-  1.1.x.
+  `~>1.1.1`.
 * Use the new `cluster_node_ip_address` field in the `polaris_cdm_boostram_cces_aws` resource to always connect to the
   first node. This prevents the provider from trying to connect to a node that is not yet bootstrapped.
 
@@ -80,14 +80,14 @@ welcome. Thank you in advance for all of your issues, pull requests, and comment
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.2.0 |
-| <a name="requirement_polaris"></a> [polaris](#requirement\_polaris) | ~>1.1.0 |
+| <a name="requirement_polaris"></a> [polaris](#requirement\_polaris) | ~>1.1.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.0.0 |
-| <a name="provider_polaris"></a> [polaris](#provider\_polaris) | 1.1.0 |
+| <a name="provider_polaris"></a> [polaris](#provider\_polaris) | 1.1.1 |
 | <a name="provider_time"></a> [time](#provider\_time) | 0.13.1 |
 | <a name="provider_tls"></a> [tls](#provider\_tls) | 4.1.0 |
 
