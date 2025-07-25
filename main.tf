@@ -10,18 +10,19 @@ locals {
   create_instance_profile = var.aws_cloud_cluster_ec2_instance_profile_precreated && var.aws_cloud_cluster_ec2_instance_profile_name != "" ? [] : ["true"]
 
   cluster_node_config = {
-    "instance_type"           = var.aws_instance_type,
-    "ami_id"                  = local.ami_id,
-    "sg_ids"                  = local.sg_ids,
-    "subnet_id"               = var.aws_subnet_id,
-    "key_pair_name"           = local.aws_key_pair_name,
-    "disable_api_termination" = var.aws_disable_api_termination,
-    "iam_instance_profile"    = var.aws_cloud_cluster_ec2_instance_profile_name == "" ? "${var.cluster_name}.instance-profile" : var.aws_cloud_cluster_ec2_instance_profile_name,
-    "availability_zone"       = data.aws_subnet.rubrik_cloud_cluster.availability_zone,
-    "tags"                    = var.aws_tags
-    "root_volume_type"        = var.cluster_disk_type
-    "root_volume_throughput"  = local.split_disk ? 125 : local.ebs_throughput
-    "http_tokens"             = var.aws_instance_imdsv2 ? "required" : "optional"
+    instance_type               = var.aws_instance_type
+    ami_id                      = local.ami_id
+    sg_ids                      = local.sg_ids
+    subnet_id                   = var.aws_subnet_id
+    key_pair_name               = local.aws_key_pair_name
+    disable_api_termination     = var.aws_disable_api_termination
+    iam_instance_profile        = (var.aws_cloud_cluster_ec2_instance_profile_name == "" ? "${var.cluster_name}.instance-profile" : var.aws_cloud_cluster_ec2_instance_profile_name)
+    availability_zone           = data.aws_subnet.rubrik_cloud_cluster.availability_zone
+    tags                        = var.aws_tags
+    root_volume_type            = var.cluster_disk_type
+    root_volume_throughput      = (local.split_disk ? 125 : local.ebs_throughput)
+    http_tokens                 = (var.aws_instance_imdsv2 ? "required" : "optional")
+    http_put_response_hop_limit = (var.aws_instance_imdsv2 ? var.metadata_http_put_response_hop_limit : 1)
   }
 
   cluster_node_ips = [for i in module.cluster_nodes.instances : i.private_ip]
@@ -276,7 +277,7 @@ resource "polaris_cdm_bootstrap_cces_aws" "bootstrap_cces_aws" {
 
 ##############################################
 # Register the Rubrik Cloud Cluster with RSC #
-###########################k##################
+##############################################
 
 resource "polaris_cdm_registration" "cces_aws_registration" {
   count                   = var.register_cluster_with_rsc ? 1 : 0
