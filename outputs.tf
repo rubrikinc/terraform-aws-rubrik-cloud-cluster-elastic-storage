@@ -6,11 +6,6 @@ output "rubrik_hosts_sg_id" {
   value = module.rubrik_hosts_sg.security_group_id
 }
 
-output "rubrik_nodes_sg_id" {
-  value       = var.pre_created_aws_cloud_cluster_nodes_sg_id != "" ? var.pre_created_aws_cloud_cluster_nodes_sg_id : module.rubrik_nodes_sg.security_group_id
-  description = "The security group ID used for Rubrik Cloud Cluster nodes (either pre-created or module-created)"
-}
-
 output "s3_bucket" {
   value = aws_s3_bucket.cces-s3-bucket.id
 }
