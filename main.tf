@@ -7,7 +7,7 @@ locals {
   sg_ids = compact(concat(
     var.aws_cloud_cluster_nodes_sg_ids,
     var.pre_created_aws_cloud_cluster_nodes_sg_id != "" ? [var.pre_created_aws_cloud_cluster_nodes_sg_id] : [],
-    length(module.rubrik_nodes_sg) > 0 ? [module.rubrik_nodes_sg[0].security_group_id] : []
+    var.pre_created_aws_cloud_cluster_nodes_sg_id == "" ? [module.rubrik_nodes_sg.security_group_id] : []
   ))
   ebs_throughput          = (var.cluster_disk_type == "gp3" ? 250 : null)
   aws_key_pair_name       = var.aws_key_pair_name == "" ? module.aws_key_pair.key_pair_name : var.aws_key_pair_name
@@ -26,7 +26,7 @@ locals {
     root_volume_type            = var.cluster_disk_type
     root_volume_throughput      = (local.split_disk ? 125 : local.ebs_throughput)
     http_tokens                 = (var.aws_instance_imdsv2 ? "required" : "optional")
-    http_put_response_hop_limit = var.metadata_http_put_response_hop_limit
+    http_put_response_hop_limit = (var.aws_instance_imdsv2 ? var.metadata_http_put_response_hop_limit : 1)
   }
 
   cluster_node_ips = [for i in module.cluster_nodes.instances : i.private_ip]
@@ -113,9 +113,9 @@ module "aws_key_pair" {
 # Create, then configure, the Security Groups for the Rubrik Cluster #
 ######################################################################
 module "rubrik_nodes_sg" {
-  count  = var.pre_created_aws_cloud_cluster_nodes_sg_id == "" ? 1 : 0
   source = "terraform-aws-modules/security-group/aws"
 
+  create          = var.pre_created_aws_cloud_cluster_nodes_sg_id == ""
   use_name_prefix = true
   name            = var.aws_vpc_cloud_cluster_nodes_sg_name == "" ? "${var.cluster_name}.sg" : var.aws_vpc_cloud_cluster_nodes_sg_name
   description     = "Allow hosts to talk to Rubrik Cloud Cluster and Cluster to talk to itself"
@@ -124,9 +124,9 @@ module "rubrik_nodes_sg" {
 }
 
 module "rubrik_nodes_sg_rules" {
-  count                          = var.pre_created_aws_cloud_cluster_nodes_sg_id == "" ? 1 : 0
   source                         = "./modules/rubrik_nodes_sg"
-  sg_id                          = module.rubrik_nodes_sg[0].security_group_id
+  create                         = var.pre_created_aws_cloud_cluster_nodes_sg_id == ""
+  sg_id                          = module.rubrik_nodes_sg.security_group_id
   rubrik_hosts_sg_id             = module.rubrik_hosts_sg.security_group_id
   cloud_cluster_nodes_admin_cidr = var.cloud_cluster_nodes_admin_cidr
   tags = merge(
@@ -152,7 +152,7 @@ module "rubrik_hosts_sg_rules" {
   source = "./modules/rubrik_hosts_sg"
 
   sg_id              = module.rubrik_hosts_sg.security_group_id
-  rubrik_nodes_sg_id = var.pre_created_aws_cloud_cluster_nodes_sg_id != "" ? var.pre_created_aws_cloud_cluster_nodes_sg_id : module.rubrik_nodes_sg[0].security_group_id
+  rubrik_nodes_sg_id = var.pre_created_aws_cloud_cluster_nodes_sg_id != "" ? var.pre_created_aws_cloud_cluster_nodes_sg_id : module.rubrik_nodes_sg.security_group_id
   tags = merge(
     { Name = "${var.cluster_name}:sg-rule" },
     var.aws_tags
