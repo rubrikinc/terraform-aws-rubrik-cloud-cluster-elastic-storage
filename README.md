@@ -27,6 +27,11 @@ module "rubrik_aws_cloud_cluster" {
 
 ## Changelog
 
+### v1.6.0
+
+- Support configuring IDMSv2 Hop Count
+- Bump RSC Provider and AWS versions
+
 ### v1.5.1
 
 - Add support for using a pre-created AWS IAM instance profile with the `aws_cloud_cluster_ec2_instance_profile_precreated` variable. This allows organizations with strict IAM policies to create the instance profile separately and reference it in the module.
@@ -59,6 +64,20 @@ module "rubrik_aws_cloud_cluster" {
 - Reduce non-data disk throughput when using split disks to 125.
 
 ## Upgrading
+
+### v1.5.1 to v1.6.0
+
+1. Change the version of the module from `1.5.1` to `1.6.0`.
+2. Run `terraform init -upgrade`.
+3. Run `terraform plan` and check the output carefully. The following output is expected:
+
+```log
+No changes. Your infrastructure matches the configuration.
+
+Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.
+```
+
+4. Run `terraform apply`.
 
 ### v1.5.0 to v1.5.1
 
