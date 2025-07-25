@@ -27,7 +27,7 @@ module "rubrik_aws_cloud_cluster" {
 
 ## Changelog
 
-### v1.6.0
+### v1.6.0
 
 - Support configuring IDMSv2 Hop Count
 - Bump RSC Provider and AWS versions
@@ -84,7 +84,7 @@ Terraform has compared your real infrastructure against your configuration and f
 1. Change the version of the module from `1.5.0` to `1.5.1`.
 2. Remove the `aws_region` variable from the module and move the `region` declaration to the `provider "aws"` block.
 
-```
+```hcl
 provider "aws" {
   region = "us-west-1"
 }
