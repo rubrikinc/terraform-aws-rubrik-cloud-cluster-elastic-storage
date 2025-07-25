@@ -299,6 +299,12 @@ variable "enableImmutability" {
   default     = null
 }
 
+variable "pre_created_aws_cloud_cluster_nodes_sg_id" {
+  description = "The ID of the pre-created security group to use for the Rubrik Cloud Cluster nodes."
+  type        = string
+  default     = ""
+}
+
 check "deprecations" {
   assert {
     condition     = var.enableImmutability == null
