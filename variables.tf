@@ -306,6 +306,17 @@ check "deprecations" {
   }
 }
 
+check "imds_hop_count" {
+  assert {
+    condition     = !var.aws_instance_imdsv2 || (!anytrue([for filter in var.aws_ami_filter : can(regex("rubrik-mp-cc-[6-8]", filter))]) || var.metadata_http_put_response_hop_limit != 2)
+    error_message = <<-EOF
+      When using a CDM 8.x.x AMI or earlier the instance metadata hop count option defaults to 1. 
+      To continue using this, please set the metadata_http_put_response_hop_limit variable to 1. 
+      Otherwise, a non-destructive in-place change will occur to change the hop count to 2.
+    EOF
+  }
+}
+
 locals {
   enable_immutability = var.enable_immutability != null ? var.enable_immutability : var.enableImmutability != null ? var.enableImmutability : true
 }
