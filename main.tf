@@ -8,6 +8,8 @@ locals {
   ebs_throughput          = (var.cluster_disk_type == "gp3" ? 250 : null)
   aws_key_pair_name       = var.aws_key_pair_name == "" ? module.aws_key_pair.key_pair_name : var.aws_key_pair_name
   create_instance_profile = var.aws_cloud_cluster_ec2_instance_profile_precreated && var.aws_cloud_cluster_ec2_instance_profile_name != "" ? [] : ["true"]
+  ami_enabled_idmsv2      = anytrue([for filter in var.aws_ami_filter : can(regex("rubrik-mp-cc-[6-8]", filter))])
+  idms_default_hop_count  = local.ami_enabled_idmsv2 ? 1 : 2
 
   cluster_node_config = {
     instance_type               = var.aws_instance_type
@@ -22,7 +24,7 @@ locals {
     root_volume_type            = var.cluster_disk_type
     root_volume_throughput      = (local.split_disk ? 125 : local.ebs_throughput)
     http_tokens                 = (var.aws_instance_imdsv2 ? "required" : "optional")
-    http_put_response_hop_limit = (var.aws_instance_imdsv2 ? var.metadata_http_put_response_hop_limit : 1)
+    http_put_response_hop_limit = (var.aws_instance_imdsv2 ? var.metadata_http_put_response_hop_limit : local.idms_default_hop_count)
   }
 
   cluster_node_ips = [for i in module.cluster_nodes.instances : i.private_ip]
