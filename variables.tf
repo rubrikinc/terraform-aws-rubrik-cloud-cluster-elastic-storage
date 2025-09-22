@@ -1,5 +1,11 @@
 # Instance/Node settings.
 
+variable "enable_split_disk" {
+  description = "If true, uses seprate disk for data , metadata , cache."
+  type        = bool
+  default     = true
+}
+
 variable "aws_instance_imdsv2" {
   description = "Enable support for IMDSv2 instances. Only supported with CCES v8.1.3 or CCES v9.0 and higher."
   type        = bool
