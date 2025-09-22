@@ -185,18 +185,18 @@ module "iam_role" {
 # S3 VPC Endpoint for Cloud Cluster ES #
 ########################################
 
-module "s3_vpc_endpoint" {
-  count  = var.create_s3_vpc_endpoint ? 1 : 0
-  source = "./modules/s3_vpc_endpoint"
+# module "s3_vpc_endpoint" {
+#   count  = var.create_s3_vpc_endpoint ? 1 : 0
+#   source = "./modules/s3_vpc_endpoint"
 
-  vpc_id          = data.aws_subnet.rubrik_cloud_cluster.vpc_id
-  route_table_ids = var.s3_vpc_endpoint_route_table_ids
+#   vpc_id          = data.aws_subnet.rubrik_cloud_cluster.vpc_id
+#   route_table_ids = var.s3_vpc_endpoint_route_table_ids
 
-  tags = merge(
-    { Name = "${var.cluster_name}:ep" },
-    var.aws_tags
-  )
-}
+#   tags = merge(
+#     { Name = "${var.cluster_name}:ep" },
+#     var.aws_tags
+#   )
+# }
 
 ###########################
 # Create S3 Bucket in AWS #
