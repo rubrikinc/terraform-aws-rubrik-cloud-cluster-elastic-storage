@@ -3,7 +3,6 @@
 #############################
 locals {
   cluster_node_names      = formatlist("${var.cluster_name}-%02s", range(1, var.number_of_nodes + 1))
-  split_disk              = var.enable_split_disk
   ami_id                  = var.aws_image_id == "" || var.aws_image_id == "latest" ? data.aws_ami_ids.rubrik_cloud_cluster.ids[0] : var.aws_image_id
   sg_ids                  = var.aws_cloud_cluster_nodes_sg_ids == "" ? [module.rubrik_nodes_sg.security_group_id] : concat(var.aws_cloud_cluster_nodes_sg_ids, [module.rubrik_nodes_sg.security_group_id])
   ebs_throughput          = (var.cluster_disk_type == "gp3" ? 250 : null)
