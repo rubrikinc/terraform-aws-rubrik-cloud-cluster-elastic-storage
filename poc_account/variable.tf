@@ -7,10 +7,10 @@ variable "profile" {
 }
 
 variable "region" {
-    description = "insert the region where resources are to be created"
-    type        = string
-    default     = "null"
-  
+  description = "insert the region where resources are to be created"
+  type        = string
+  default     = "null"
+
 }
 
 #global Variables
