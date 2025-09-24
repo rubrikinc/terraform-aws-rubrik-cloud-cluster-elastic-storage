@@ -1,9 +1,7 @@
 # Instance/Node settings.
-
-variable "enable_split_disk" {
-  description = "If true, uses seprate disk for data , metadata , cache."
-  type        = bool
-  default     = true
+variable "rubrik_hosts_cidrs" {
+  description = "List of CIDRs for Rubrik hosts prefix list"
+  type        = list(string)
 }
 
 variable "aws_instance_imdsv2" {

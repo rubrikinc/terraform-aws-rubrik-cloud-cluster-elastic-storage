@@ -28,5 +28,6 @@ module "pamoncloud_controller" {
   aws_disable_api_termination = var.aws_disable_api_termination
   rubrik_hosts_cidrs          = var.rubrik_hosts_cidrs
   aws_key_pair_name           = var.aws_key_pair_name
+  create_s3_vpc_endpoint      = var.create_s3_vpc_endpoint
 
 }
