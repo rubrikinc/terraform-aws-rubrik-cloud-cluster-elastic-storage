@@ -1,5 +1,5 @@
 # Instance/Node settings.
-
+#provider specific variables
 variable "profile" {
   description = "AWS CLI profile name"
   type        = string
@@ -11,6 +11,13 @@ variable "region" {
     type        = string
     default     = "null"
   
+}
+
+#global Variables
+variable "rubrik_hosts_cidrs" {
+  description = "List of CIDRs for Rubrik hosts prefix list"
+  type        = list(string)
+  default     = []
 }
 
 variable "aws_instance_imdsv2" {

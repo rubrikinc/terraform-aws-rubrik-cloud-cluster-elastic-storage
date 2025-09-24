@@ -1,8 +1,8 @@
 # Configure the AWS Provider
 provider "aws" {
-  region = var.region
+  region  = var.region
   profile = var.profile
- }
+}
 
 ################################################################################
 # pamoncloud_controller Module
@@ -26,5 +26,7 @@ module "pamoncloud_controller" {
   number_of_nodes             = var.number_of_nodes
   aws_instance_imdsv2         = var.aws_instance_imdsv2
   aws_disable_api_termination = var.aws_disable_api_termination
+  rubrik_hosts_cidrs          = var.rubrik_hosts_cidrs
+  aws_key_pair_name           = var.aws_key_pair_name
 
 }
