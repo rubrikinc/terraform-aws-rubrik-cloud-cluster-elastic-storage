@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.1
+
+- Add optional `split_disk` variable to manually override split disk auto-detection. When set, the AMI lookup used to
+  determine the CDM version is skipped, preventing Terraform failures when an AMI has been deregistered from the AWS
+  Marketplace.
+
 ## v1.6.0
 
 - Support configuring IMDSv2 Hop Count
