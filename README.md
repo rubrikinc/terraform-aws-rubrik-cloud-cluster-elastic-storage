@@ -185,6 +185,49 @@ displayed:
 If this occurs, open the specific link from the error, while logged into the AWS account where the Cloud Cluster will be
 deployed. Follow the instructions for subscribing to the product.
 
+### Error: Invalid index — empty list from AMI lookup
+
+When running `terraform plan`, the following error may occur:
+
+```log
+Error: Invalid index
+
+  on .terraform/modules/rubrik_cluster/main.tf line 6, in locals:
+   6:   ami_id = var.aws_image_id == "" || var.aws_image_id == "latest" ? data.aws_ami_ids.rubrik_cloud_cluster.ids[0] : var.aws_image_id
+    |----------------
+    | data.aws_ami_ids.rubrik_cloud_cluster.ids is empty list of string
+
+The given key does not identify an element in this collection value: the collection has no elements.
+```
+
+This happens when the AMI has been deregistered from the AWS Marketplace in the region where the cluster is deployed
+(e.g. a specific CDM version was withdrawn from the marketplace). Since the AMI filter no longer matches any available
+AMIs, Terraform cannot look up the AMI ID automatically.
+
+**Fix:** Set the `aws_image_id` variable to the specific AMI ID of the existing cluster instances. The `split_disk`
+variable must also be set explicitly because the AMI version lookup used for auto-detection is also skipped. Set
+`split_disk` to `true` for CDM 9.2.2 and later, or `false` for earlier CDM versions.
+
+### Error: Your query returned no results
+
+When the `aws_image_id` variable is set to a specific AMI ID that has since been deregistered, `terraform plan` may
+fail with:
+
+```log
+Error: Your query returned no results. Please change your search criteria and try again.
+
+  with data.aws_ami.cces_ami[0],
+  on .terraform/modules/rubrik_cluster/split_disk.tf line 1, in data "aws_ami" "cces_ami":
+   1: data "aws_ami" "cces_ami" {
+```
+
+Setting `aws_image_id` bypasses the primary AMI list lookup (avoiding the "Invalid index" error above), but the
+split-disk auto-detection in `split_disk.tf` still tries to resolve the AMI metadata by image ID to determine the
+CDM version. When the AMI has been deregistered, this lookup fails.
+
+**Fix:** Set the `split_disk` variable explicitly to skip the AMI metadata lookup entirely. Use `true` for CDM 9.2.2
+and later, or `false` for earlier CDM versions.
+
 ## How You Can Help
 
 We welcome contributions from the community. From updating the documentation to adding more functionality, all ideas are
