@@ -98,6 +98,12 @@ variable "aws_subnet_id" {
 
 # Storage settings.
 
+variable "split_disk" {
+  description = "Manually override the split disk feature. When set, the AMI lookup used to determine the CDM version is skipped. Set to `true` for CDM >= 9.2.2, `false` for earlier versions. Leave as `null` to auto-detect from the AMI."
+  type        = bool
+  default     = null
+}
+
 variable "cluster_disk_type" {
   description = "Disk type for the data disk: gp2 or gp3. Note, gp3 is only supported from version 8.1.1 for Cloud Cluster ES."
   type        = string
