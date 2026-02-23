@@ -27,6 +27,12 @@ module "rubrik_aws_cloud_cluster" {
 
 ## Changelog
 
+### v1.6.1
+
+- Add optional `split_disk` variable to manually override split disk auto-detection. When set, the AMI lookup used to
+  determine the CDM version is skipped, preventing Terraform failures when an AMI has been deregistered from the AWS
+  Marketplace.
+
 ### v1.6.0
 
 - Support configuring IMDSv2 Hop Count
@@ -201,10 +207,10 @@ welcome. Thank you in advance for all of your issues, pull requests, and comment
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 6.4.0 |
-| <a name="provider_polaris"></a> [polaris](#provider\_polaris) | 1.1.3 |
-| <a name="provider_time"></a> [time](#provider\_time) | 0.13.1 |
-| <a name="provider_tls"></a> [tls](#provider\_tls) | 4.1.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.84.0 |
+| <a name="provider_polaris"></a> [polaris](#provider\_polaris) | >= 1.1.2 |
+| <a name="provider_time"></a> [time](#provider\_time) | n/a |
+| <a name="provider_tls"></a> [tls](#provider\_tls) | n/a |
 
 ## Modules
 
@@ -251,6 +257,7 @@ welcome. Thank you in advance for all of your issues, pull requests, and comment
 | <a name="input_enable_immutability"></a> [enable\_immutability](#input\_enable\_immutability) | Enables object lock and versioning on the S3 bucket. Sets the object lock flag during bootstrap. Not supported on CDM v8.0.1 and earlier. | `bool` | `null` | no |
 | <a name="input_register_cluster_with_rsc"></a> [register\_cluster\_with\_rsc](#input\_register\_cluster\_with\_rsc) | Register the Rubrik Cloud Cluster with Rubrik Security Cloud. | `bool` | `false` | no |
 | <a name="input_s3_bucket_force_destroy"></a> [s3\_bucket\_force\_destroy](#input\_s3\_bucket\_force\_destroy) | A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. | `bool` | `false` | no |
+| <a name="input_split_disk"></a> [split\_disk](#input\_split\_disk) | Manually override the split disk feature. When set, the AMI lookup used to determine the CDM version is skipped. Set to `true` for CDM >= 9.2.2, `false` for earlier versions. Leave as `null` to auto-detect from the AMI. | `bool` | `null` | no |
 | <a name="input_dns_name_servers"></a> [dns\_name\_servers](#input\_dns\_name\_servers) | List of the IPv4 addresses of the DNS servers. | `list(any)` | <pre>[<br/>  "169.254.169.253"<br/>]</pre> | no |
 | <a name="input_dns_search_domain"></a> [dns\_search\_domain](#input\_dns\_search\_domain) | List of search domains that the DNS Service will use to resolve hostnames that are not fully qualified. | `list(any)` | `[]` | no |
 | <a name="input_aws_cloud_cluster_nodes_sg_ids"></a> [aws\_cloud\_cluster\_nodes\_sg\_ids](#input\_aws\_cloud\_cluster\_nodes\_sg\_ids) | Additional security groups to add to Rubrik cluster nodes. | `list(string)` | `[]` | no |
