@@ -12,9 +12,11 @@ variable "tags" {
   default = {}
 }
 
-variable "rubrik_hosts_sg_id" {
-  type = string
+variable "prefix_list_id" {
+  type        = string
+  description = "Prefix list ID"
 }
+
 
 variable "cloud_cluster_nodes_admin_cidr" {
   type = string
