@@ -99,7 +99,7 @@ variable "aws_subnet_id" {
 # Storage settings.
 
 variable "split_disk" {
-  description = "Manually override the split disk feature. When set, the AMI lookup used to determine the CDM version is skipped. Set to `true` for CDM >= 9.2.2, `false` for earlier versions. Leave as `null` to auto-detect from the AMI."
+  description = "Manually override the split disk feature. When set, the AMI lookup used to determine the CDM version is skipped. Set to `true` for CDM >= 9.2.2, `false` for earlier versions. Leave as `null` to auto-detect from the AMI. Note: the value must match the CDM version the cluster was originally built with, not the current version after any upgrades. Changing this value on an existing cluster will cause the cluster nodes to be rebuilt."
   type        = bool
   default     = null
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.6.2
+
+- Update `split_disk` variable documentation to clarify that the value must match the CDM version the cluster was
+  originally built with, not the current version after any upgrades.
+
 ## v1.6.1
 
 - Add optional `split_disk` variable to manually override split disk auto-detection. When set, the AMI lookup used to
