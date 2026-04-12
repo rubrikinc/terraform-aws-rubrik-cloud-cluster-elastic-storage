@@ -1,7 +1,23 @@
 # Instance/Node settings.
+#provider specific variables
+variable "profile" {
+  description = "AWS CLI profile name"
+  type        = string
+  default     = "null"
+}
+
+variable "region" {
+  description = "insert the region where resources are to be created"
+  type        = string
+  default     = "null"
+
+}
+
+#global Variables
 variable "rubrik_hosts_cidrs" {
   description = "List of CIDRs for Rubrik hosts prefix list"
   type        = list(string)
+  default     = []
 }
 
 variable "aws_instance_imdsv2" {
@@ -101,12 +117,6 @@ variable "aws_subnet_id" {
 }
 
 # Storage settings.
-
-variable "split_disk" {
-  description = "Manually override the split disk feature. When set, the AMI lookup used to determine the CDM version is skipped. Set to `true` for CDM >= 9.2.2, `false` for earlier versions. Leave as `null` to auto-detect from the AMI. Note: the value must match the CDM version the cluster was originally built with, not the current version after any upgrades. Changing this value on an existing cluster will cause the cluster nodes to be rebuilt."
-  type        = bool
-  default     = null
-}
 
 variable "cluster_disk_type" {
   description = "Disk type for the data disk: gp2 or gp3. Note, gp3 is only supported from version 8.1.1 for Cloud Cluster ES."

@@ -2,11 +2,12 @@
 # Dynamic Variable Creation #
 #############################
 locals {
-  cluster_node_names      = formatlist("${var.cluster_name}-%02s", range(1, var.number_of_nodes + 1))
-  ami_id                  = var.aws_image_id == "" || var.aws_image_id == "latest" ? data.aws_ami_ids.rubrik_cloud_cluster.ids[0] : var.aws_image_id
-  sg_ids                  = var.aws_cloud_cluster_nodes_sg_ids == "" ? [module.rubrik_nodes_sg.security_group_id] : concat(var.aws_cloud_cluster_nodes_sg_ids, [module.rubrik_nodes_sg.security_group_id])
-  ebs_throughput          = (var.cluster_disk_type == "gp3" ? 250 : null)
-  aws_key_pair_name       = var.aws_key_pair_name == "" ? module.aws_key_pair.key_pair_name : var.aws_key_pair_name
+  cluster_node_names = formatlist("${var.cluster_name}-%02s", range(1, var.number_of_nodes + 1))
+  ami_id             = var.aws_image_id == "" || var.aws_image_id == "latest" ? data.aws_ami_ids.rubrik_cloud_cluster.ids[0] : var.aws_image_id
+  sg_ids             = var.aws_cloud_cluster_nodes_sg_ids == "" ? [module.rubrik_nodes_sg.security_group_id] : concat(var.aws_cloud_cluster_nodes_sg_ids, [module.rubrik_nodes_sg.security_group_id])
+  ebs_throughput     = (var.cluster_disk_type == "gp3" ? 250 : null)
+  aws_key_pair_name  = var.aws_key_pair_name == "" ? module.aws_key_pair[0].key_pair_name : var.aws_key_pair_name
+  # aws_key_pair_name       = var.aws_key_pair_name == "" ? module.aws_key_pair.key_pair_name : var.aws_key_pair_name
   create_instance_profile = var.aws_cloud_cluster_ec2_instance_profile_precreated && var.aws_cloud_cluster_ec2_instance_profile_name != "" ? [] : ["true"]
   ami_enabled_idmsv2      = anytrue([for filter in var.aws_ami_filter : can(regex("rubrik-mp-cc-[6-8]", filter))])
   idms_default_hop_count  = local.ami_enabled_idmsv2 ? 1 : 2
@@ -79,12 +80,14 @@ data "aws_ami_ids" "rubrik_cloud_cluster" {
 
 # Create RSA key of size 4096 bits
 resource "tls_private_key" "cc-key" {
+  count     = var.aws_key_pair_name == "" ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 # Store private key in AWS Secrets Manager
 resource "aws_secretsmanager_secret" "cces-private-key" {
+  count                   = var.aws_key_pair_name == "" ? 1 : 0
   name                    = "${var.cluster_name}-private-key"
   recovery_window_in_days = var.private_key_recovery_window_in_days
 
@@ -92,17 +95,18 @@ resource "aws_secretsmanager_secret" "cces-private-key" {
 }
 
 resource "aws_secretsmanager_secret_version" "cces-private-key-value" {
-  secret_id     = aws_secretsmanager_secret.cces-private-key.id
-  secret_string = tls_private_key.cc-key.private_key_pem
+  count         = var.aws_key_pair_name == "" ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.cces-private-key[0].id
+  secret_string = tls_private_key.cc-key[0].private_key_pem
 }
 
 # Create SSH Key
 module "aws_key_pair" {
-  source  = "terraform-aws-modules/key-pair/aws"
-  version = "~> 2.0.0"
-
+  source     = "terraform-aws-modules/key-pair/aws"
+  version    = "~> 2.0.0"
+  count      = var.aws_key_pair_name == "" ? 1 : 0
   key_name   = var.aws_key_pair_name == "" ? "${var.cluster_name}.key-pair" : var.aws_key_pair_name
-  public_key = tls_private_key.cc-key.public_key_openssh
+  public_key = tls_private_key.cc-key[0].public_key_openssh
 
   tags = var.aws_tags
 }
@@ -120,43 +124,65 @@ module "rubrik_nodes_sg" {
   tags            = var.aws_tags
 }
 
+resource "aws_ec2_managed_prefix_list" "rubrik_hosts_prefix_list" {
+  name           = "${var.cluster_name}-hosts-prefix-list"
+  address_family = "IPv4"
+  max_entries    = length(var.rubrik_hosts_cidrs)
+
+  dynamic "entry" {
+    for_each = var.rubrik_hosts_cidrs
+    content {
+      cidr        = entry.value
+      description = "CIDR for Rubrik hosts"
+    }
+  }
+
+  tags = var.aws_tags
+}
+
 module "rubrik_nodes_sg_rules" {
   source                         = "./modules/rubrik_nodes_sg"
   sg_id                          = module.rubrik_nodes_sg.security_group_id
-  rubrik_hosts_sg_id             = module.rubrik_hosts_sg.security_group_id
+  prefix_list_id                 = aws_ec2_managed_prefix_list.rubrik_hosts_prefix_list.id
   cloud_cluster_nodes_admin_cidr = var.cloud_cluster_nodes_admin_cidr
   tags = merge(
     { name = "${var.cluster_name}:sg-rule" },
     var.aws_tags
   )
-  depends_on = [
-    module.rubrik_hosts_sg
-  ]
+  #   depends_on = [
+  #   resource.aws_ec2_managed_prefix_list.rubrik_hosts_prefix_list
+  # ]
 }
 
-module "rubrik_hosts_sg" {
-  source = "terraform-aws-modules/security-group/aws"
+# rubrik_hosts_sg_id             = module.rubrik_hosts_sg.security_group_id
+#   depends_on = [
+#     module.rubrik_hosts_sg
+#   ]
+# }
 
-  use_name_prefix = true
-  name            = var.aws_vpc_cloud_cluster_hosts_sg_name == "" ? "${var.cluster_name}.sg" : var.aws_vpc_cloud_cluster_hosts_sg_name
-  description     = "Allow Rubrik Cloud Cluster to talk to hosts, and hosts with this security group can talk to cluster"
-  vpc_id          = data.aws_subnet.rubrik_cloud_cluster.vpc_id
-  tags            = var.aws_tags
-}
+# module "rubrik_hosts_sg" {
+#   source = "terraform-aws-modules/security-group/aws"
 
-module "rubrik_hosts_sg_rules" {
-  source = "./modules/rubrik_hosts_sg"
+#   use_name_prefix = true
+#   name            = var.aws_vpc_cloud_cluster_hosts_sg_name == "" ? "${var.cluster_name}.sg" : var.aws_vpc_cloud_cluster_hosts_sg_name
+#   description     = "Allow Rubrik Cloud Cluster to talk to hosts, and hosts with this security group can talk to cluster"
+#   vpc_id          = data.aws_subnet.rubrik_cloud_cluster.vpc_id
+#   tags            = var.aws_tags
+# }
 
-  sg_id              = module.rubrik_hosts_sg.security_group_id
-  rubrik_nodes_sg_id = module.rubrik_nodes_sg.security_group_id
-  tags = merge(
-    { Name = "${var.cluster_name}:sg-rule" },
-    var.aws_tags
-  )
-  depends_on = [
-    module.rubrik_nodes_sg
-  ]
-}
+# module "rubrik_hosts_sg_rules" {
+#   source = "./modules/rubrik_hosts_sg"
+
+#   sg_id              = module.rubrik_hosts_sg.security_group_id
+#   rubrik_nodes_sg_id = module.rubrik_nodes_sg.security_group_id
+#   tags = merge(
+#     { Name = "${var.cluster_name}:sg-rule" },
+#     var.aws_tags
+#   )
+#   depends_on = [
+#     module.rubrik_nodes_sg
+#   ]
+# }
 
 ##############################
 # Create IAM Role and Policy #
