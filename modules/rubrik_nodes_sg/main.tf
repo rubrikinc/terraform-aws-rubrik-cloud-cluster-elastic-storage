@@ -1,5 +1,6 @@
 module "this" {
-  source = "terraform-aws-modules/security-group/aws"
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
 
   create_sg         = false
   security_group_id = var.sg_id

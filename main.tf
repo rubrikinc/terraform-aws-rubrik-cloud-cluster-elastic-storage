@@ -111,7 +111,8 @@ module "aws_key_pair" {
 # Create, then configure, the Security Groups for the Rubrik Cluster #
 ######################################################################
 module "rubrik_nodes_sg" {
-  source = "terraform-aws-modules/security-group/aws"
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
 
   use_name_prefix = true
   name            = var.aws_vpc_cloud_cluster_nodes_sg_name == "" ? "${var.cluster_name}.sg" : var.aws_vpc_cloud_cluster_nodes_sg_name
@@ -135,7 +136,8 @@ module "rubrik_nodes_sg_rules" {
 }
 
 module "rubrik_hosts_sg" {
-  source = "terraform-aws-modules/security-group/aws"
+  source  = "terraform-aws-modules/security-group/aws"
+  version = "~> 5.0"
 
   use_name_prefix = true
   name            = var.aws_vpc_cloud_cluster_hosts_sg_name == "" ? "${var.cluster_name}.sg" : var.aws_vpc_cloud_cluster_hosts_sg_name

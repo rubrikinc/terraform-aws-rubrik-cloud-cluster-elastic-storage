@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.6.3
+
+- Pin the `terraform-aws-modules/security-group/aws` module to `~> 5.0`. Version 6.0.0 of that module is a rewrite that
+  removed the `ingress_with_self`, `ingress_with_source_security_group_id`, and `ingress_with_cidr_blocks` inputs (and
+  requires AWS provider 6.x), which broke this module since no version constraint was previously set.
+
 ## v1.6.2
 
 - Update `split_disk` variable documentation to clarify that the value must match the CDM version the cluster was
